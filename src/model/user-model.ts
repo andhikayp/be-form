@@ -3,6 +3,8 @@ export type UserResponse = {
   email: string;
   name: string;
   phoneNumber: string;
+  password: string;
+  confirmPassword: string;
 };
 
 export type CreateUserRequest = {
@@ -15,8 +17,8 @@ export type CreateUserRequest = {
 };
 
 function formatPhoneNumber(phoneNumber: string): string {
-  if (phoneNumber.startsWith('+62')) {
-    return '0' + phoneNumber.substr(3);
+  if (phoneNumber.startsWith("+62")) {
+    return "0" + phoneNumber.substr(3);
   }
   return phoneNumber;
 }
@@ -26,6 +28,8 @@ export function toUserResponse(user: CreateUserRequest): UserResponse {
     name: user.name,
     username: user.username,
     email: user.email,
+    password: user.password,
+    confirmPassword: user.confirmPassword,
     phoneNumber: formatPhoneNumber(user.phoneNumber),
   };
 }

@@ -20,7 +20,9 @@ response body (success):
     "username": "testing",
     "name": "Bob Alice",
     "email": "bob@gmail.com",
-    "phoneNumber": "081252252252"
+    "phoneNumber": "081252252252",
+    "password": "hash(password)",
+    "confirmPassword": "hash(confirmPassword)"
   }
 }
 ```

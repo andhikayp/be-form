@@ -19,6 +19,7 @@ export class UserService {
     );
 
     registerRequest.password = await bcrypt.hash(registerRequest.password, 10);
+    registerRequest.confirmPassword = await bcrypt.hash(registerRequest.confirmPassword, 10);
 
     return toUserResponse(registerRequest);
   }
