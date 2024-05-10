@@ -1,11 +1,18 @@
 import express from "express";
-import { logger } from "./logging";
+import cors from "cors";
 
+import { logger } from "./logging";
 import { publicRouter } from "../route/public-api";
 import { errorMiddleware } from "../middleware/error-middleware";
 
-const port = 3000;
+const port = 3001;
 export const web = express();
+web.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 web.use(express.json());
 web.use(publicRouter);
 web.use(errorMiddleware);

@@ -14,11 +14,18 @@ export type CreateUserRequest = {
   confirmPassword: string;
 };
 
+function formatPhoneNumber(phoneNumber: string): string {
+  if (phoneNumber.startsWith('+62')) {
+    return '0' + phoneNumber.substr(3);
+  }
+  return phoneNumber;
+}
+
 export function toUserResponse(user: CreateUserRequest): UserResponse {
   return {
     name: user.name,
     username: user.username,
     email: user.email,
-    phoneNumber: user.phoneNumber,
+    phoneNumber: formatPhoneNumber(user.phoneNumber),
   };
 }

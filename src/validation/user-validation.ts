@@ -33,12 +33,9 @@ export class UserValidation {
         }),
       name: z
         .string()
-        .min(1, { message: "Email has to be filled" })
-        .max(100, { message: "Name must be at most 100 characters long" })
-        .regex(/^[a-zA-Z]+$/, {
-          message:
-            "Name must contain only letters (no numbers or special characters)",
-        }),
+        .min(1, { message: 'Name has to be filled' })
+        .max(100, { message: 'Name must be at most 100 characters long' })
+        .regex(/^[a-zA-Z\s]*$/, 'Name must contain only letters and blank spaces'),
       phoneNumber: z
         .string()
         .min(13, {
