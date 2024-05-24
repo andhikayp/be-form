@@ -24,10 +24,12 @@ export type CreateTransactionResponse = {
   referenceNumber: string;
   totalTransfer: number;
   totalAmount: number;
-  sourceAccountNumber: string;
+  sourceAccount: string;
   instructionType: string;
-  transferType: string;
   status: string;
+  createdAt: Date;
+  transferDate?: Date | null;
+  transferType?: string;
 };
 
 export interface CreateTransactionResponseWithMaker
@@ -40,16 +42,12 @@ export function toTransactionResponse(
   transactions: TransactionRequest[]
 ): CreateTransactionResponse {
   return {
-    referenceNumber: groupTransfer.referenceNumber,
+    ...groupTransfer,
     totalTransfer: transactions.length,
     totalAmount: transactions.reduce(
       (acc, transaction) => acc + transaction.amount,
       0
     ),
-    status: groupTransfer.status,
-    sourceAccountNumber: groupTransfer.sourceAccount,
-    instructionType: groupTransfer.instructionType,
-    transferType: groupTransfer.transferType,
   };
 }
 

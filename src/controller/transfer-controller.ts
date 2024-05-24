@@ -59,4 +59,24 @@ export class TransferController {
       next(error);
     }
   }
+
+  static async getTransaction(
+    req: UserRequest,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { referenceNumber } = req.params as { referenceNumber: string };
+      const response = await TransferService.getTransactionBy(
+        req.user!,
+        referenceNumber
+      );
+
+      res.status(200).json({
+        data: response,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

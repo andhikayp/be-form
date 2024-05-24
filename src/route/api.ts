@@ -13,3 +13,4 @@ apiRouter.get(
   TransferController.getTransactionOverview
 );
 apiRouter.get("/api/transactions", TransferController.getTransactionList);
+apiRouter.get("/api/transaction/:referenceNumber", TransferController.getTransaction);

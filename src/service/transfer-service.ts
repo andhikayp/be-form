@@ -86,23 +86,39 @@ export class TransferService {
     if (role === UserRole.MAKER) {
       return prismaClient.groupTransfer.findMany({
         where: { sourceAccount },
-        include: { Transactions: true, makerUser: true },
+        include: {
+          Transactions: true,
+          makerUser: { select: { username: true } },
+        },
       });
     }
 
     return prismaClient.groupTransfer.findMany({
       where: { sourceAccount, status: TransactionStatus.WAITING },
-      include: { Transactions: true, makerUser: true },
+      include: {
+        Transactions: true,
+        makerUser: { select: { username: true } },
+      },
     });
   }
 
   static async getTransactionList(user: UserWithCorporate) {
     const sourceAccount = user.Corporate.corporateAccountNumber;
     const role = user.role;
-    console.log(sourceAccount, role, 'masuk a')
     const groupTransfers = await this.fetchGroupTransferBy(role, sourceAccount);
-    console.log(groupTransfers, 'groupTransfer')
 
     return toTransactionResponseWithMakerName(groupTransfers);
+  }
+
+  static async getTransactionBy(user: UserWithCorporate, referenceNumber: string) {
+    const sourceAccount = user.Corporate.corporateAccountNumber;
+    const groupTransfer = await prismaClient.groupTransfer.findFirst({
+      where: { sourceAccount, referenceNumber },
+      include: {
+        Transactions: true,
+      },
+    });
+
+    return toTransactionResponse(groupTransfer!, groupTransfer!.Transactions);
   }
 }
