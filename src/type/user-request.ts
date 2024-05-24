@@ -8,3 +8,10 @@ export interface UserWithCorporate extends User {
 export interface UserRequest extends Request {
   user?: UserWithCorporate;
 }
+
+export const UserRole = {
+  MAKER: "MAKER",
+  APPROVER: "APPROVER",
+} as const;
+
+export type UserRoleType = keyof typeof UserRole;

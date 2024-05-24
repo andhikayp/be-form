@@ -19,4 +19,16 @@ export class TransferController {
       next(error);
     }
   }
+  
+  static async getTransactionOverview(req: UserRequest, res: Response, next: NextFunction) {
+    try {
+      const response = await TransferService.getTransactionOverview(req.user!);
+
+      res.status(200).json({
+        data: response,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

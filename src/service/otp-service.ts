@@ -57,11 +57,8 @@ export class OtpService {
   }
 
   static async isOtpValid(email: string, otp: string): Promise<{}> {
-    console.log(email, otp, "masuk lah");
     const existingOtp = await prismaClient.otp.findFirst({
-      where: {
-        email,
-      },
+      where: { email },
     });
 
     if (existingOtp?.otp === otp) {

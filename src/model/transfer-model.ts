@@ -1,7 +1,7 @@
 import { GroupTransfer, Transaction, User } from "@prisma/client";
 
 export type CreateTransactionRequest = {
-  intructionType: string;
+  instructionType: string;
   transferDate?: string;
   transferTime?: string;
   transactions: {
@@ -25,7 +25,7 @@ export type CreateTransactionResponse = {
   totalTransfer: number;
   totalAmount: number;
   sourceAccountNumber: string;
-  intructionType: string;
+  instructionType: string;
   transferType: string;
 };
 
@@ -41,7 +41,7 @@ export function toTransactionResponse(
       0
     ),
     sourceAccountNumber: groupTransfer.sourceAccount,
-    intructionType: groupTransfer.instructionType,
+    instructionType: groupTransfer.instructionType,
     transferType: groupTransfer.transferType,
   };
 }
