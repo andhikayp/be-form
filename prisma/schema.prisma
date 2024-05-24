@@ -13,6 +13,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Otp {
+  email     String   @id @db.VarChar(100)
+  otp       String   @db.VarChar(6)
+  createdAt DateTime @default(now())
+
+  @@map("otps")
+}
+
 model Corporate {
   id                     Int    @id @default(autoincrement())
   corporateAccountNumber String @db.VarChar(12)

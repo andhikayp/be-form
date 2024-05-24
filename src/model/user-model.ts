@@ -19,6 +19,7 @@ export type CreateUserRequest = {
   email: string;
   password: string;
   confirmPassword: string;
+  otp: string;
 };
 
 export type LoginRequest = {

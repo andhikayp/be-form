@@ -15,6 +15,7 @@ import { Validation } from "../validation/validation";
 import { response } from "express";
 import { toCorporateResponse } from "../model/corporate-model";
 import { User } from "@prisma/client";
+import { OtpService } from "./otp-service";
 
 export class UserService {
   static async register(request: CreateUserRequest): Promise<{}> {
@@ -22,6 +23,13 @@ export class UserService {
       UserValidation.REGISTER,
       request
     );
+    const { corporateAccountNumber, corporateName, otp, ...userRequest } =
+      registerRequest;
+
+    const isOtpValid = await OtpService.isOtpValid(registerRequest.email, otp);
+    if (!isOtpValid) {
+      throw new ResponseError(400, "OTP is not valid");
+    }
 
     const totalUserWithSameUserID = await prismaClient.user.count({
       where: {
@@ -39,8 +47,6 @@ export class UserService {
       },
     });
 
-    const { corporateAccountNumber, corporateName, ...userRequest } =
-      registerRequest;
     if (!corporate) {
       corporate = await prismaClient.corporate.create({
         data: {
