@@ -27,7 +27,13 @@ export type CreateTransactionResponse = {
   sourceAccountNumber: string;
   instructionType: string;
   transferType: string;
+  status: string;
 };
+
+export interface CreateTransactionResponseWithMaker
+  extends CreateTransactionResponse {
+  makerName: string;
+}
 
 export function toTransactionResponse(
   groupTransfer: GroupTransfer,
@@ -40,8 +46,23 @@ export function toTransactionResponse(
       (acc, transaction) => acc + transaction.amount,
       0
     ),
+    status: groupTransfer.status,
     sourceAccountNumber: groupTransfer.sourceAccount,
     instructionType: groupTransfer.instructionType,
     transferType: groupTransfer.transferType,
   };
+}
+
+export function toTransactionResponseWithMakerName(groupTransfers: any) {
+  return groupTransfers.map((groupTransfer: any) => {
+    const transactionResponse = toTransactionResponse(
+      groupTransfer,
+      groupTransfer.Transactions
+    );
+
+    return {
+      ...transactionResponse,
+      makerName: groupTransfer.makerUser.username,
+    };
+  });
 }

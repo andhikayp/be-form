@@ -5,6 +5,7 @@ import { prismaClient } from "../application/database";
 import {
   CreateTransactionRequest,
   toTransactionResponse,
+  toTransactionResponseWithMakerName,
   TransactionRequest,
 } from "../model/transfer-model";
 import { UserRole, UserWithCorporate } from "../type/user-request";
@@ -76,5 +77,32 @@ export class TransferService {
     });
 
     return statusCounts;
+  }
+
+  private static async fetchGroupTransferBy(
+    role: string,
+    sourceAccount: string
+  ) {
+    if (role === UserRole.MAKER) {
+      return prismaClient.groupTransfer.findMany({
+        where: { sourceAccount },
+        include: { Transactions: true, makerUser: true },
+      });
+    }
+
+    return prismaClient.groupTransfer.findMany({
+      where: { sourceAccount, status: TransactionStatus.WAITING },
+      include: { Transactions: true, makerUser: true },
+    });
+  }
+
+  static async getTransactionList(user: UserWithCorporate) {
+    const sourceAccount = user.Corporate.corporateAccountNumber;
+    const role = user.role;
+    console.log(sourceAccount, role, 'masuk a')
+    const groupTransfers = await this.fetchGroupTransferBy(role, sourceAccount);
+    console.log(groupTransfers, 'groupTransfer')
+
+    return toTransactionResponseWithMakerName(groupTransfers);
   }
 }
