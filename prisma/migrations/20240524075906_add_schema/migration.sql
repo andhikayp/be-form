@@ -1,10 +1,19 @@
 -- CreateTable
+CREATE TABLE `corporates` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `corporateAccountNumber` VARCHAR(12) NOT NULL,
+    `corporateName` VARCHAR(100) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `users` (
     `userId` VARCHAR(30) NOT NULL,
     `username` VARCHAR(100) NOT NULL,
-    `corporateAccountNumber` VARCHAR(12) NOT NULL,
-    `corporateName` VARCHAR(100) NOT NULL,
+    `corporateId` INTEGER NOT NULL,
     `role` VARCHAR(20) NOT NULL,
+    `email` VARCHAR(100) NOT NULL,
     `phoneNumber` VARCHAR(15) NOT NULL,
     `password` VARCHAR(100) NOT NULL,
     `verificationCode` VARCHAR(6) NULL,
@@ -46,6 +55,9 @@ CREATE TABLE `transactions` (
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- AddForeignKey
+ALTER TABLE `users` ADD CONSTRAINT `users_corporateId_fkey` FOREIGN KEY (`corporateId`) REFERENCES `corporates`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `group_transfers` ADD CONSTRAINT `group_transfers_makerUserId_fkey` FOREIGN KEY (`makerUserId`) REFERENCES `users`(`userId`) ON DELETE RESTRICT ON UPDATE CASCADE;

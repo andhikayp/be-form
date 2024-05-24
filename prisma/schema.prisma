@@ -13,27 +13,37 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Corporate {
+  id                     Int    @id @default(autoincrement())
+  corporateAccountNumber String @db.VarChar(12)
+  corporateName          String @db.VarChar(100)
+  Users                  User[]
+
+  @@map("corporates")
+}
+
 model User {
-  userId                 String          @id @unique @db.VarChar(30)
-  username               String          @db.VarChar(100)
-  corporateAccountNumber String          @db.VarChar(12)
-  corporateName          String          @db.VarChar(100)
-  role                   String          @db.VarChar(20)
-  phoneNumber            String          @db.VarChar(15)
-  password               String          @db.VarChar(100)
-  verificationCode       String?         @db.VarChar(6) // Assuming verificationCode is optional
-  createdAt              DateTime        @default(now())
-  updatedAt              DateTime        @updatedAt
-  GroupTransfers         GroupTransfer[]
-  Transactions           Transaction[]   @relation("UserTransactions")
+  userId           String          @id @unique @db.VarChar(30)
+  username         String          @db.VarChar(100)
+  corporateId      Int
+  role             String          @db.VarChar(20)
+  email            String          @db.VarChar(100)
+  phoneNumber      String          @db.VarChar(15)
+  password         String          @db.VarChar(100)
+  verificationCode String?         @db.VarChar(6)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  GroupTransfers   GroupTransfer[]
+  Transactions     Transaction[]   @relation("UserTransactions")
+  Corporate        Corporate       @relation(fields: [corporateId], references: [id])
 
   @@map("users")
 }
 
 model GroupTransfer {
   referenceNumber String        @id @default(uuid())
-  totalAmount     Int? // optional
-  totalRecord     Int? // optional
+  totalAmount     Int?
+  totalRecord     Int?
   sourceAccount   String        @db.VarChar(12)
   makerUserId     String
   status          String        @db.VarChar(15)
@@ -49,12 +59,12 @@ model Transaction {
   id                     Int       @id @default(autoincrement())
   amount                 Int
   groupTransferId        String    @default(uuid())
-  sourceAccount          String?   @db.VarChar(12) // optional
+  sourceAccount          String?   @db.VarChar(12)
   destinationAccount     String    @db.VarChar(12)
   destinationBankName    String    @db.VarChar(50)
   destinationAccountName String    @db.VarChar(100)
-  date                   DateTime? // optional
-  transferTime           DateTime? // optional, should be time but Prisma uses DateTime for all datetime fields
+  date                   DateTime?
+  transferTime           DateTime?
   makerUserId            String
   instructionType        String    @db.VarChar(20)
   transferType           String    @db.VarChar(20)

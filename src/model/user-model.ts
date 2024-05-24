@@ -1,35 +1,32 @@
+import { User } from "@prisma/client";
+
 export type UserResponse = {
+  userId: string;
   username: string;
-  email: string;
-  name: string;
+  role: string;
   phoneNumber: string;
-  password: string;
-  confirmPassword: string;
+  email: string;
 };
 
 export type CreateUserRequest = {
+  corporateAccountNumber: string;
+  corporateName: string;
+  userId: string;
   username: string;
-  email: string;
-  name: string;
+  role: string;
   phoneNumber: string;
+  verificationCode: string;
+  email: string;
   password: string;
   confirmPassword: string;
 };
 
-function formatPhoneNumber(phoneNumber: string): string {
-  if (phoneNumber.startsWith("+62")) {
-    return "0" + phoneNumber.substr(3);
-  }
-  return phoneNumber;
-}
-
-export function toUserResponse(user: CreateUserRequest): UserResponse {
+export function toUserResponse(user: User): UserResponse {
   return {
-    name: user.name,
+    userId: user.userId,
+    role: user.role,
     username: user.username,
     email: user.email,
-    password: user.password,
-    confirmPassword: user.confirmPassword,
-    phoneNumber: formatPhoneNumber(user.phoneNumber),
+    phoneNumber: user.phoneNumber,
   };
 }
