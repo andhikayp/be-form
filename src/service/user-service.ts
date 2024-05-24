@@ -6,6 +6,7 @@ import { prismaClient } from "../application/database";
 import { ResponseError } from "../error/response-error";
 import {
   CreateUserRequest,
+  LoginRequest,
   toUserResponse,
   UserResponse,
 } from "../model/user-model";
@@ -49,23 +50,60 @@ export class UserService {
       });
     }
 
-    registerRequest.password = await bcrypt.hash(registerRequest.password, 10);
+    userRequest.password = await bcrypt.hash(registerRequest.password, 10);
 
     const user = await prismaClient.user.create({
       data: { ...userRequest, corporateId: corporate.id },
     });
 
+    return UserService.response(user, corporate);
+  }
+
+  private static response(user: { userId: string; username: string; corporateId: number; role: string; email: string; phoneNumber: string; password: string; verificationCode: string | null; createdAt: Date; updatedAt: Date; }, corporate: { id: number; corporateAccountNumber: string; corporateName: string; }) {
     const secretKey = "secretKey";
     const userResponse = toUserResponse(user);
     const corporateResponse = toCorporateResponse(corporate);
-    const token = jwt.sign({ user: userResponse, corporate: corporateResponse }, secretKey, {
-      expiresIn: 86400,
-    });
+    const token = jwt.sign(
+      { user: userResponse, corporate: corporateResponse },
+      secretKey,
+      {
+        expiresIn: 86400,
+      }
+    );
 
     return {
       token,
       user: userResponse,
       corporat: corporateResponse,
     };
+  }
+
+  static async login(request: LoginRequest): Promise<{}> {
+    const user = await prismaClient.user.findUnique({
+      where: {
+        userId: request.userId,
+      },
+      include: {
+        Corporate: true,
+      },
+    });
+
+    if (!user) {
+      throw new ResponseError(401, "Not found");
+    }
+
+    if (user.Corporate.corporateAccountNumber !== request.corporateAccountNumber) {
+      throw new ResponseError(401, "Not found");
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      request.password,
+      user.password
+    );
+    if (!isPasswordValid) {
+      throw new ResponseError(401, "Not found");
+    }
+
+    return UserService.response(user, user.Corporate);
   }
 }

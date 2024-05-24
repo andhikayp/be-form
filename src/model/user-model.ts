@@ -21,6 +21,12 @@ export type CreateUserRequest = {
   confirmPassword: string;
 };
 
+export type LoginRequest = {
+  corporateAccountNumber: string;
+  userId: string;
+  password: string;
+};
+
 export function toUserResponse(user: User): UserResponse {
   return {
     userId: user.userId,
