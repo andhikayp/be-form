@@ -23,10 +23,10 @@ export class UserService {
       UserValidation.REGISTER,
       request
     );
-    const { corporateAccountNumber, corporateName, otp, ...userRequest } =
+    const { corporateAccountNumber, corporateName, verificationCode, ...userRequest } =
       registerRequest;
 
-    const isOtpValid = await OtpService.isOtpValid(registerRequest.email, otp);
+    const isOtpValid = await OtpService.isOtpValid(registerRequest.email, verificationCode);
     if (!isOtpValid) {
       throw new ResponseError(400, "OTP is not valid");
     }
@@ -75,7 +75,6 @@ export class UserService {
       token: string | null;
       phoneNumber: string;
       password: string;
-      verificationCode: string | null;
       createdAt: Date;
       updatedAt: Date;
     },

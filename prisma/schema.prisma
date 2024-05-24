@@ -31,33 +31,34 @@ model Corporate {
 }
 
 model User {
-  userId           String          @id @unique @db.VarChar(30)
-  username         String          @db.VarChar(100)
-  corporateId      Int
-  role             String          @db.VarChar(20)
-  email            String          @db.VarChar(100)
-  phoneNumber      String          @db.VarChar(15)
-  password         String          @db.VarChar(100)
-  verificationCode String?         @db.VarChar(6)
-  token            String?         @unique @db.VarChar(512)
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  GroupTransfers   GroupTransfer[]
-  Transactions     Transaction[]   @relation("UserTransactions")
-  Corporate        Corporate       @relation(fields: [corporateId], references: [id])
+  userId         String          @id @unique @db.VarChar(30)
+  username       String          @db.VarChar(100)
+  corporateId    Int
+  role           String          @db.VarChar(20)
+  email          String          @db.VarChar(100)
+  phoneNumber    String          @db.VarChar(15)
+  password       String          @db.VarChar(100)
+  token          String?         @unique @db.VarChar(512)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  GroupTransfers GroupTransfer[]
+  Corporate      Corporate       @relation(fields: [corporateId], references: [id])
 
   @@map("users")
 }
 
 model GroupTransfer {
-  referenceNumber String        @id @default(uuid())
-  totalAmount     Int?
-  totalRecord     Int?
-  sourceAccount   String        @db.VarChar(12)
+  referenceNumber String    @id @default(uuid())
+  sourceAccount   String    @db.VarChar(12)
   makerUserId     String
-  status          String        @db.VarChar(15)
-  createdAt       DateTime      @default(now())
-  Transactions    Transaction[]
+  status          String    @db.VarChar(15)
+  transferDate    DateTime?
+  transferTime    String?
+  instructionType String    @db.VarChar(20)
+  transferType    String    @db.VarChar(20)
+  createdAt       DateTime  @default(now())
+
+  Transactions Transaction[]
 
   makerUser User @relation(fields: [makerUserId], references: [userId])
 
@@ -65,21 +66,14 @@ model GroupTransfer {
 }
 
 model Transaction {
-  id                     Int       @id @default(autoincrement())
+  id                     Int      @id @default(autoincrement())
   amount                 Int
-  groupTransferId        String    @default(uuid())
-  sourceAccount          String?   @db.VarChar(12)
-  destinationAccount     String    @db.VarChar(12)
-  destinationBankName    String    @db.VarChar(50)
-  destinationAccountName String    @db.VarChar(100)
-  date                   DateTime?
-  transferTime           DateTime?
-  makerUserId            String
-  instructionType        String    @db.VarChar(20)
-  transferType           String    @db.VarChar(20)
-  createdAt              DateTime  @default(now())
+  groupTransferId        String   @default(uuid())
+  destinationAccount     String   @db.VarChar(12)
+  destinationBankName    String   @db.VarChar(50)
+  destinationAccountName String   @db.VarChar(100)
+  createdAt              DateTime @default(now())
 
-  makerUser     User          @relation("UserTransactions", fields: [makerUserId], references: [userId])
   groupTransfer GroupTransfer @relation(fields: [groupTransferId], references: [referenceNumber])
 
   @@map("transactions")

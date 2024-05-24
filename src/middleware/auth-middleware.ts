@@ -7,11 +7,14 @@ export const authMiddleware = async (
   res: Response,
   next: NextFunction
 ) => {
-  const token = req.get('X-API-TOKEN');
+  const token = req.get("X-API-TOKEN");
   if (token) {
     const user = await prismaClient.user.findFirst({
       where: {
         token,
+      },
+      include: {
+        Corporate: true,
       },
     });
 

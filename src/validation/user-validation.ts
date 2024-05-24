@@ -25,10 +25,6 @@ export class UserValidation {
       .string()
       .min(1, { message: "Email is required" })
       .max(100, { message: "Email must be at most 100 characters long" }),
-    otp: z
-      .string()
-      .min(1, { message: "OTP is required" })
-      .max(6, { message: "OTP must be at most 6 characters long" }),
     password: z
       .string()
       .min(8, { message: "Password must be at least 8 characters long" })
