@@ -17,10 +17,12 @@ CREATE TABLE `users` (
     `phoneNumber` VARCHAR(15) NOT NULL,
     `password` VARCHAR(100) NOT NULL,
     `verificationCode` VARCHAR(6) NULL,
+    `token` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
     UNIQUE INDEX `users_userId_key`(`userId`),
+    UNIQUE INDEX `users_token_key`(`token`),
     PRIMARY KEY (`userId`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

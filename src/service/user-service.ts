@@ -14,6 +14,7 @@ import { UserValidation } from "../validation/user-validation";
 import { Validation } from "../validation/validation";
 import { response } from "express";
 import { toCorporateResponse } from "../model/corporate-model";
+import { User } from "@prisma/client";
 
 export class UserService {
   static async register(request: CreateUserRequest): Promise<{}> {
@@ -21,7 +22,6 @@ export class UserService {
       UserValidation.REGISTER,
       request
     );
-    console.log(registerRequest, "registerRequest");
 
     const totalUserWithSameUserID = await prismaClient.user.count({
       where: {
@@ -59,7 +59,26 @@ export class UserService {
     return UserService.response(user, corporate);
   }
 
-  private static response(user: { userId: string; username: string; corporateId: number; role: string; email: string; phoneNumber: string; password: string; verificationCode: string | null; createdAt: Date; updatedAt: Date; }, corporate: { id: number; corporateAccountNumber: string; corporateName: string; }) {
+  private static async response(
+    user: {
+      userId: string;
+      username: string;
+      corporateId: number;
+      role: string;
+      email: string;
+      token: string | null;
+      phoneNumber: string;
+      password: string;
+      verificationCode: string | null;
+      createdAt: Date;
+      updatedAt: Date;
+    },
+    corporate: {
+      id: number;
+      corporateAccountNumber: string;
+      corporateName: string;
+    }
+  ) {
     const secretKey = "secretKey";
     const userResponse = toUserResponse(user);
     const corporateResponse = toCorporateResponse(corporate);
@@ -70,6 +89,13 @@ export class UserService {
         expiresIn: 86400,
       }
     );
+
+    await prismaClient.user.update({
+      where: {
+        userId: user.userId,
+      },
+      data: { token },
+    });
 
     return {
       token,
@@ -92,7 +118,9 @@ export class UserService {
       throw new ResponseError(401, "Not found");
     }
 
-    if (user.Corporate.corporateAccountNumber !== request.corporateAccountNumber) {
+    if (
+      user.Corporate.corporateAccountNumber !== request.corporateAccountNumber
+    ) {
       throw new ResponseError(401, "Not found");
     }
 
@@ -105,5 +133,18 @@ export class UserService {
     }
 
     return UserService.response(user, user.Corporate);
+  }
+
+  static async logout(user: User): Promise<{}> {
+    const result = await prismaClient.user.update({
+      where: {
+        userId: user.userId,
+      },
+      data: {
+        token: null,
+      },
+    });
+
+    return toUserResponse(result);
   }
 }
