@@ -36,7 +36,7 @@ export class UserController {
       await UserService.logout(req.user!);
 
       res.status(200).json({
-        data: 'OK',
+        data: "OK",
       });
     } catch (error) {
       next(error);

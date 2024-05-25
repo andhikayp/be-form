@@ -16,6 +16,7 @@ import { response } from "express";
 import { toCorporateResponse } from "../model/corporate-model";
 import { User } from "@prisma/client";
 import { OtpService } from "./otp-service";
+import { CustomError } from "../error/custom-error";
 
 export class UserService {
   static async register(request: CreateUserRequest): Promise<{}> {
@@ -23,12 +24,28 @@ export class UserService {
       UserValidation.REGISTER,
       request
     );
-    const { corporateAccountNumber, corporateName, verificationCode, ...userRequest } =
-      registerRequest;
+    const {
+      corporateAccountNumber,
+      corporateName,
+      verificationCode,
+      ...userRequest
+    } = registerRequest;
 
-    const isOtpValid = await OtpService.isOtpValid(registerRequest.email, verificationCode);
+    const isOtpValid = await OtpService.isOtpValid(
+      registerRequest.email,
+      verificationCode
+    );
     if (!isOtpValid) {
-      throw new ResponseError(400, "OTP is not valid");
+      throw new CustomError(
+        400,
+        JSON.stringify([
+          {
+            code: "not_valid",
+            path: ["verificationCode"],
+            message: "Verification code is not valid",
+          },
+        ])
+      );
     }
 
     const totalUserWithSameUserID = await prismaClient.user.count({
@@ -38,7 +55,16 @@ export class UserService {
     });
 
     if (totalUserWithSameUserID != 0) {
-      throw new ResponseError(400, "User ID is already exists");
+      throw new CustomError(
+        400,
+        JSON.stringify([
+          {
+            code: "already_exist",
+            path: ["userId"],
+            message: "User ID is already exist",
+          },
+        ])
+      );
     }
 
     let corporate = await prismaClient.corporate.findFirst({
@@ -106,6 +132,7 @@ export class UserService {
       token,
       user: userResponse,
       corporat: corporateResponse,
+      loginTime: new Date(),
     };
   }
 
