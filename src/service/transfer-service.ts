@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { prismaClient } from "../application/database";
 import {
+  AuditRequest,
   CreateTransactionRequest,
   toTransactionResponse,
   toTransactionResponseWithMakerName,
@@ -15,6 +16,7 @@ import {
   TransactionStatusType,
   TransferType,
 } from "../type/transaction";
+import { ResponseError } from "../error/response-error";
 
 export class TransferService {
   static async createTransactions(
@@ -110,7 +112,10 @@ export class TransferService {
     return toTransactionResponseWithMakerName(groupTransfers);
   }
 
-  static async getTransactionBy(user: UserWithCorporate, referenceNumber: string) {
+  static async getTransactionBy(
+    user: UserWithCorporate,
+    referenceNumber: string
+  ) {
     const sourceAccount = user.Corporate.corporateAccountNumber;
     const groupTransfer = await prismaClient.groupTransfer.findFirst({
       where: { sourceAccount, referenceNumber },
@@ -118,7 +123,33 @@ export class TransferService {
         Transactions: true,
       },
     });
+    const { Transactions, ...details } = groupTransfer!;
 
-    return toTransactionResponse(groupTransfer!, groupTransfer!.Transactions);
+    return toTransactionResponse(details, Transactions, true);
+  }
+
+  static async auditTransaction(
+    user: UserWithCorporate,
+    referenceNumber: string,
+    req: AuditRequest
+  ) {
+    const { status } = req;
+    const { role } = user;
+    if (role !== UserRole.APPROVER) {
+      throw new ResponseError(403, "Forbidden");
+    }
+
+    const groupTransfer = await prismaClient.groupTransfer.findFirst({
+      where: { referenceNumber },
+    });
+
+    if (groupTransfer?.status !== TransactionStatus.WAITING) {
+      throw new ResponseError(403, "Forbidden");
+    }
+
+    await prismaClient.groupTransfer.update({
+      where: { referenceNumber },
+      data: { status },
+    });
   }
 }

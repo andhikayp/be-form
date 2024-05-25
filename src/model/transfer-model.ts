@@ -12,6 +12,10 @@ export type CreateTransactionRequest = {
   }[];
 };
 
+export type AuditRequest = {
+  status: string;
+}
+
 export type TransactionRequest = {
   amount: number;
   destinationAccount: string;
@@ -39,10 +43,12 @@ export interface CreateTransactionResponseWithMaker
 
 export function toTransactionResponse(
   groupTransfer: GroupTransfer,
-  transactions: TransactionRequest[]
+  transactions: TransactionRequest[],
+  withTransactions: boolean = false
 ): CreateTransactionResponse {
   return {
     ...groupTransfer,
+    ...(withTransactions && { transactions }),
     totalTransfer: transactions.length,
     totalAmount: transactions.reduce(
       (acc, transaction) => acc + transaction.amount,
@@ -53,14 +59,8 @@ export function toTransactionResponse(
 
 export function toTransactionResponseWithMakerName(groupTransfers: any) {
   return groupTransfers.map((groupTransfer: any) => {
-    const transactionResponse = toTransactionResponse(
-      groupTransfer,
-      groupTransfer.Transactions
-    );
+    const { Transactions, ...details } = groupTransfer!;
 
-    return {
-      ...transactionResponse,
-      makerName: groupTransfer.makerUser.username,
-    };
+    return toTransactionResponse(details, Transactions);
   });
 }

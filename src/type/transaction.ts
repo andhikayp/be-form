@@ -8,8 +8,6 @@ export type TransactionStatusType = keyof typeof TransactionStatus;
 
 export const TransferType = {
   ONLINE: "ONLINE",
-  APPROVED: "APPROVED",
-  WAITING: "WAITING",
 } as const;
 
 export type TransferTypeType = keyof typeof TransferType;

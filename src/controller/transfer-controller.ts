@@ -3,7 +3,10 @@ import { NextFunction, Request, Response } from "express";
 import { CreateUserRequest, LoginRequest } from "../model/user-model";
 import { OtpService } from "../service/otp-service";
 import { TransferService } from "../service/transfer-service";
-import { CreateTransactionRequest } from "../model/transfer-model";
+import {
+  AuditRequest,
+  CreateTransactionRequest,
+} from "../model/transfer-model";
 import { UserRequest } from "../type/user-request";
 
 export class TransferController {
@@ -74,6 +77,28 @@ export class TransferController {
 
       res.status(200).json({
         data: response,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async auditTransaction(
+    req: UserRequest,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const request: AuditRequest = req.body as AuditRequest;
+      const { referenceNumber } = req.params as { referenceNumber: string };
+      await TransferService.auditTransaction(
+        req.user!,
+        referenceNumber,
+        request
+      );
+
+      res.status(200).json({
+        data: "OK",
       });
     } catch (error) {
       next(error);
