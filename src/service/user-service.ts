@@ -147,13 +147,13 @@ export class UserService {
     });
 
     if (!user) {
-      throw new ResponseError(401, "Not found");
+      throw new ResponseError(401, "User Not Found");
     }
 
     if (
       user.Corporate.corporateAccountNumber !== request.corporateAccountNumber
     ) {
-      throw new ResponseError(401, "Not found");
+      throw new ResponseError(401, "User Not Found");
     }
 
     const isPasswordValid = await bcrypt.compare(
@@ -161,7 +161,7 @@ export class UserService {
       user.password
     );
     if (!isPasswordValid) {
-      throw new ResponseError(401, "Not found");
+      throw new ResponseError(401, "User Not Found");
     }
 
     return UserService.response(user, user.Corporate);

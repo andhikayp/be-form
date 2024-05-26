@@ -23,6 +23,10 @@ export class TransferService {
     req: CreateTransactionRequest,
     user: UserWithCorporate
   ): Promise<{}> {
+    const { role } = user;
+    if (role === UserRole.APPROVER) {
+      throw new ResponseError(403, "Forbidden");
+    }
     const referenceNumber = uuidv4();
     const payload = {
       referenceNumber,
