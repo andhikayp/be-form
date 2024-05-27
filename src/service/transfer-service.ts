@@ -170,6 +170,12 @@ export class TransferService {
       take: limit,
     });
     const totalTransactions = await prismaClient.transaction.count(condition);
+    const totalAmount = await prismaClient.transaction.aggregate({
+      ...condition,
+      _sum: {
+        amount: true,
+      },
+    });
 
     const mappedGroupTransfer = toTransactionResponse(
       groupTransfer,
@@ -178,7 +184,7 @@ export class TransferService {
     );
 
     return {
-      data: mappedGroupTransfer,
+      data: { ...mappedGroupTransfer, totalAmount: totalAmount._sum.amount },
       totalPages: Math.ceil(totalTransactions / limit),
       currentPage: page,
       count: totalTransactions,
