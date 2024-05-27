@@ -12,6 +12,11 @@ export type CreateTransactionRequest = {
   }[];
 };
 
+export type Pagination = {
+  page: string;
+  limit: string;
+}
+
 export type AuditRequest = {
   status: string;
 }
@@ -34,6 +39,7 @@ export type CreateTransactionResponse = {
   createdAt: Date;
   transferDate?: Date | null;
   transferType?: string;
+  transactions?: Object[]; 
 };
 
 export interface CreateTransactionResponseWithMaker

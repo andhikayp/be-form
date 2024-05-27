@@ -87,49 +87,102 @@ export class TransferService {
 
   private static async fetchGroupTransferBy(
     role: string,
-    sourceAccount: string
+    sourceAccount: string,
+    page: number,
+    limit: number
   ) {
+    const skip = (page - 1) * limit;
+    let condition = {};
     if (role === UserRole.MAKER) {
-      return prismaClient.groupTransfer.findMany({
+      condition = {
         where: { sourceAccount },
-        include: {
-          Transactions: true,
-          makerUser: { select: { username: true } },
-        },
-      });
+      };
+    }
+    if (role === UserRole.APPROVER) {
+      condition = {
+        where: { sourceAccount, status: TransactionStatus.WAITING },
+      };
     }
 
-    return prismaClient.groupTransfer.findMany({
-      where: { sourceAccount, status: TransactionStatus.WAITING },
+    const groupTransfers = await prismaClient.groupTransfer.findMany({
+      ...condition,
       include: {
         Transactions: true,
         makerUser: { select: { username: true } },
       },
+      skip,
+      take: limit,
     });
+    const totalGroupTransfers = await prismaClient.groupTransfer.count(
+      condition
+    );
+
+    return { groupTransfers, totalGroupTransfers };
   }
 
-  static async getTransactionList(user: UserWithCorporate) {
+  static async getTransactionList(
+    user: UserWithCorporate,
+    page: number,
+    limit: number
+  ) {
     const sourceAccount = user.Corporate.corporateAccountNumber;
     const role = user.role;
-    const groupTransfers = await this.fetchGroupTransferBy(role, sourceAccount);
+    const { groupTransfers, totalGroupTransfers } =
+      await this.fetchGroupTransferBy(role, sourceAccount, page, limit);
 
-    return toTransactionResponseWithMakerName(groupTransfers);
+    const mappedGroupTransfers =
+      toTransactionResponseWithMakerName(groupTransfers);
+
+    return {
+      data: mappedGroupTransfers,
+      totalPages: Math.ceil(totalGroupTransfers / limit),
+      currentPage: page,
+      count: totalGroupTransfers,
+    };
   }
 
   static async getTransactionBy(
     user: UserWithCorporate,
-    referenceNumber: string
+    referenceNumber: string,
+    page: number,
+    limit: number
   ) {
     const sourceAccount = user.Corporate.corporateAccountNumber;
+
     const groupTransfer = await prismaClient.groupTransfer.findFirst({
       where: { sourceAccount, referenceNumber },
       include: {
-        Transactions: true,
+        makerUser: { select: { username: true } },
       },
     });
-    const { Transactions, ...details } = groupTransfer!;
 
-    return toTransactionResponse(details, Transactions, true);
+    if (!groupTransfer) {
+      throw new ResponseError(404, "Not Found");
+    }
+
+    const condition = {
+      where: { groupTransferId: groupTransfer!.referenceNumber },
+    };
+    const skip = (page - 1) * limit;
+    const Transactions = await prismaClient.transaction.findMany({
+      ...condition,
+      skip,
+      take: limit,
+    });
+    const totalTransactions = await prismaClient.transaction.count(condition);
+
+    const mappedGroupTransfer = toTransactionResponse(
+      groupTransfer,
+      Transactions,
+      true
+    );
+
+    return {
+      data: mappedGroupTransfer,
+      totalPages: Math.ceil(totalTransactions / limit),
+      currentPage: page,
+      count: totalTransactions,
+    };
   }
 
   static async auditTransaction(

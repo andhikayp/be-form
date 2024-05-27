@@ -6,6 +6,7 @@ import { TransferService } from "../service/transfer-service";
 import {
   AuditRequest,
   CreateTransactionRequest,
+  Pagination,
 } from "../model/transfer-model";
 import { UserRequest } from "../type/user-request";
 
@@ -53,11 +54,17 @@ export class TransferController {
     next: NextFunction
   ) {
     try {
-      const response = await TransferService.getTransactionList(req.user!);
+      const query: Pagination = req.query as Pagination;
+      const page = parseInt(query.page, 10) || 1;
+      const limit = parseInt(query.limit, 10) || 10;
 
-      res.status(200).json({
-        data: response,
-      });
+      const response = await TransferService.getTransactionList(
+        req.user!,
+        page,
+        limit
+      );
+
+      res.status(200).json(response);
     } catch (error) {
       next(error);
     }
@@ -69,15 +76,19 @@ export class TransferController {
     next: NextFunction
   ) {
     try {
+      const query: Pagination = req.query as Pagination;
+      const page = parseInt(query.page, 10) || 1;
+      const limit = parseInt(query.limit, 10) || 10;
+
       const { referenceNumber } = req.params as { referenceNumber: string };
       const response = await TransferService.getTransactionBy(
         req.user!,
-        referenceNumber
+        referenceNumber,
+        page,
+        limit
       );
 
-      res.status(200).json({
-        data: response,
-      });
+      res.status(200).json(response);
     } catch (error) {
       next(error);
     }
